@@ -1,0 +1,14 @@
+defaults:
+  - override hydra/launcher: submitit_slurm
+
+hydra:
+  launcher:
+    cpus_per_task: 8
+    gpus_per_task: 0
+    gres:
+    setup:
+      - module load Miniconda3
+      - conda activate symb-expl
+      - cd $SLURM_SUBMIT_DIR
+    timeout_min: 600
+    mem_per_cpu: 8GB
