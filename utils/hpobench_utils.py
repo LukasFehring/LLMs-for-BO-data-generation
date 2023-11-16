@@ -66,10 +66,7 @@ def get_run_config(n_optimized_params, max_hp_comb=None, job_id=None, parsimony_
                             {"benchmark": benchmark, "task_id": task_id, "hp_conf": hp_conf, "parsimony": parsimony})
                 else:
                     run_configs.append({"benchmark": benchmark, "task_id": task_id, "hp_conf": hp_conf})
-    if job_id:
-        return run_configs[int(job_id)]
-    else:
-        return run_configs
+    return run_configs[int(job_id)]
 
 
 class LRBenchmarkBBDefaultHP(LRBenchmarkBB):

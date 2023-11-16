@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Union
+from typing import Union, Callable
 from ConfigSpace import ConfigurationSpace
 from typing import Type
 from smac import Scenario, Callback
@@ -12,8 +12,8 @@ from smac.acquisition.function import AbstractAcquisitionFunction
 def run_smac_optimization(
     configspace: ConfigurationSpace,
     facade: Type[AbstractFacade],
-    acquisition_function: str,
-    target_function: AbstractAcquisitionFunction,
+    acquisition_function: AbstractAcquisitionFunction,
+    target_function: Callable,
     function_name: str,
     n_eval: int,
     run_dir: str,
@@ -42,12 +42,12 @@ def run_smac_optimization(
     conf_hp: Evaluated hyperparameter settings.
     conf_res: According true function value for each evaluated hyperparameter setting.
     """
-
+    acquisition_function_name = acquisition_function.__class__.__name__
     scenario = Scenario(
         configspace=configspace,
         deterministic=True,
         n_trials=n_eval,
-        output_directory=Path(f"{run_dir}/smac/{function_name}"),
+        output_directory=Path(f"{run_dir}/smac/{acquisition_function_name}/{function_name}"),
         seed=seed,
     )
 
