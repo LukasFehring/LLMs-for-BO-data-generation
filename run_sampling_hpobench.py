@@ -10,23 +10,26 @@ from utils.logging_utils import get_logger
 from utils.run_utils import get_surrogate_predictions
 from utils.smac_utils import run_smac_optimization
 from utils.hpobench_utils import get_run_config, get_benchmark_dict, get_task_dict
+from smac.acquisition.function import LCB, EI, PI
 
 
 class SurrogateModelCallback(Callback):
     def on_next_configurations_end(self, config, config_selector):
-        if config._acquisition_function._eta:
-            surrogate_model = config._model
-            processed_configs = len(config._processed_configs)
-            if processed_configs in n_samples_spacing:
-                with open(
-                        f"{sampling_run_dir}/surrogates/n_eval{n_samples}_samples{processed_configs}_seed{seed}.pkl",
-                        "wb") as surrogate_file:
-                    pickle.dump(surrogate_model, surrogate_file)
+        if isinstance(config._acquisition_function, EI):
+            if config._acquisition_function._eta:
+                surrogate_model = config._model
+                processed_configs = len(config._processed_configs)
+                if processed_configs in n_samples_spacing:
+                    with open(
+                            f"{sampling_run_dir}/surrogates/n_eval{n_samples}_samples{processed_configs}_seed{seed}.pkl",
+                            "wb") as surrogate_file:
+                        pickle.dump(surrogate_model, surrogate_file)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--job_id') #Todo What is this for?
+    parser.add_argument('--job_id',
+                        default=1)
     parser.add_argument('--run_type',
                         choices=["smac", "rand", "surr"],
                         help=
@@ -39,8 +42,8 @@ if __name__ == "__main__":
                         )    
     parser.add_argument('--n_optimized_params',
                         type=int,
-                        default=1,
-                        help='Number of hyperparameters to optimize. Defaults to 1.'
+                        default=2,
+                        help='Number of hyperparameters to optimize. Defaults to 2.'
                         )
     parser.add_argument('--n_seeds', type= int, default=5)
     
@@ -83,7 +86,7 @@ if __name__ == "__main__":
     #     # Thus, we do separate runs for each sample size as long as the number of initial designs would differ
     #     if run_type == "surr":
     #         n_samples_to_eval = n_samples_spacing
-    if run_type == "smac": # todo is this the same as run_type == "smac"?
+    if run_type == "smac":
         # init design max ratio beschränkt die anzahl an hyperparmeter kombinationen die in der init design phase
         n_samples_to_eval = [n for n in n_samples_spacing if
                             init_design_max_ratio * n < n_optimized_params * init_design_n_configs_per_hyperparamter]#
@@ -107,72 +110,75 @@ if __name__ == "__main__":
 
     logger.info(f"Start {run_type} sampling for {run_name}.")
 
-    for n_samples in n_samples_to_eval:
+    for acquisition_function in [LCB(), EI(), PI()]:
 
-        logger.info(f"Run: {run_name}")
-        logger.info(f"Start run to sample {n_samples} samples.")
+        for n_samples in n_samples_to_eval:
 
-        # required for surrogate evaluation
-        if init_design_max_ratio * n_samples < n_optimized_params * init_design_n_configs_per_hyperparamter:
-            n_eval = n_samples
-        else:
-            n_eval = max(n_samples_spacing)
+            logger.info(f"Run: {run_name}")
+            logger.info(f"Start run to sample {n_samples} samples.")
 
-        df_samples = pd.DataFrame()
-
-        for i in range(n_seeds):
-            seed = i * 3
-
-            np.random.seed(seed)
-
-            # add only parameters to be optimized to configspace
-            cs = b.get_configuration_space(seed=seed, hyperparameters=optimized_parameters)
-
-            logger.info(f"Sample configs and train {model_name} with seed {seed}.")
-
-            # if run_type == "rand":
-            #     configurations = cs.sample_configuration(size=n_samples)
-            #     performances = np.array(
-            #         [b.objective_function(config.get_dictionary(), seed=seed)["function_value"] for config in
-            #          configurations]
-            #     )
-            #     configurations = np.array(
-            #         [list(i.get_dictionary().values()) for i in configurations]
-            #     ).T
-            # elif run_type == "surr":
-            #     configurations = cs.sample_configuration(size=surrogate_n_samples)
-            #     configurations = np.array(
-            #         [list(i.get_dictionary().values()) for i in configurations]
-            #     ).T
-            #     with open(f"results/{sampling_dir_name}/smac/{run_name}/surrogates/n_eval{n_eval}"
-            #               f"_samples{n_samples}_seed{seed}.pkl", "rb") as surrogate_file:
-            #         surrogate_model = pickle.load(surrogate_file)
-            #     performances = np.array(get_surrogate_predictions(configurations.T, cs, surrogate_model))
-            if run_type == "smac":
-                configurations, performances, _ = run_smac_optimization(
-                    configspace=cs,
-                    facade=BlackBoxFacade, # Stndard gaussian process no multi fidelity
-                    target_function=optimization_function_wrapper,
-                    function_name=model_name,
-                    n_eval=n_samples,
-                    run_dir=sampling_run_dir,
-                    seed=seed,
-                    n_configs_per_hyperparamter=init_design_n_configs_per_hyperparamter,
-                    max_ratio=init_design_max_ratio,
-                    callback=SurrogateModelCallback()
-                )
+            # required for surrogate evaluation
+            if init_design_max_ratio * n_samples < n_optimized_params * init_design_n_configs_per_hyperparamter:
+                n_eval = n_samples
             else:
-                raise ValueError(f"Unknown or disabled run type {run_type}.")
+                n_eval = max(n_samples_spacing)
 
-            df = pd.DataFrame(
-                data=np.concatenate((configurations.T,
-                                     performances.reshape(-1, 1)), axis=1),
-                columns=optimized_parameters + ["cost"])
-            df.insert(0, "seed", seed)
-            df = df.reset_index()
-            df = df.rename(columns={"index": "n_samples"})
-            df["n_samples"] = df["n_samples"] + 1
-            df_samples = pd.concat((df_samples, df))
+            df_samples = pd.DataFrame()
 
-            df_samples.to_csv(f"{sampling_run_dir}/samples_{n_samples}.csv", index=False)
+            for i in range(n_seeds):
+                seed = i * 3
+
+                np.random.seed(seed)
+
+                # add only parameters to be optimized to configspace
+                cs = b.get_configuration_space(seed=seed, hyperparameters=optimized_parameters)
+
+                logger.info(f"Sample configs and train {model_name} with seed {seed}.")
+
+                # if run_type == "rand":
+                #     configurations = cs.sample_configuration(size=n_samples)
+                #     performances = np.array(
+                #         [b.objective_function(config.get_dictionary(), seed=seed)["function_value"] for config in
+                #          configurations]
+                #     )
+                #     configurations = np.array(
+                #         [list(i.get_dictionary().values()) for i in configurations]
+                #     ).T
+                # elif run_type == "surr":
+                #     configurations = cs.sample_configuration(size=surrogate_n_samples)
+                #     configurations = np.array(
+                #         [list(i.get_dictionary().values()) for i in configurations]
+                #     ).T
+                #     with open(f"results/{sampling_dir_name}/smac/{run_name}/surrogates/n_eval{n_eval}"
+                #               f"_samples{n_samples}_seed{seed}.pkl", "rb") as surrogate_file:
+                #         surrogate_model = pickle.load(surrogate_file)
+                #     performances = np.array(get_surrogate_predictions(configurations.T, cs, surrogate_model))
+                if run_type == "smac":
+                    configurations, performances, _ = run_smac_optimization(
+                        configspace=cs,
+                        facade=BlackBoxFacade, # Stndard gaussian process no multi fidelity
+                        acquisition_function=acquisition_function,
+                        target_function=optimization_function_wrapper,
+                        function_name=model_name,
+                        n_eval=n_samples,
+                        run_dir=sampling_run_dir,
+                        seed=seed,
+                        n_configs_per_hyperparamter=init_design_n_configs_per_hyperparamter,
+                        max_ratio=init_design_max_ratio,
+                        callback=SurrogateModelCallback()
+                    )
+                else:
+                    raise ValueError(f"Unknown or disabled run type {run_type}.")
+
+                df = pd.DataFrame(
+                    data=np.concatenate((configurations.T,
+                                        performances.reshape(-1, 1)), axis=1),
+                    columns=optimized_parameters + ["cost"])
+                df.insert(0, "seed", seed)
+                df = df.reset_index()
+                df = df.rename(columns={"index": "n_samples"})
+                df["n_samples"] = df["n_samples"] + 1
+                df_samples = pd.concat((df_samples, df))
+
+                df_samples.to_csv(f"{sampling_run_dir}/samples_{n_samples}.csv", index=False)
 

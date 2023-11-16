@@ -6,12 +6,14 @@ from ConfigSpace import ConfigurationSpace
 from typing import Type
 from smac import Scenario, Callback
 from smac.facade import AbstractFacade
+from smac.acquisition.function import AbstractAcquisitionFunction
 
 
 def run_smac_optimization(
     configspace: ConfigurationSpace,
     facade: Type[AbstractFacade],
-    target_function,
+    acquisition_function: str,
+    target_function: AbstractAcquisitionFunction,
     function_name: str,
     n_eval: int,
     run_dir: str,
@@ -55,6 +57,7 @@ def run_smac_optimization(
 
     smac = facade(
         scenario=scenario,
+        acquisition_function=acquisition_function,
         target_function=target_function,
         logging_level=Path("logging_smac.yml"),
         config_selector=config_selector,
