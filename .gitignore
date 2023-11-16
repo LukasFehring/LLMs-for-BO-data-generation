@@ -137,3 +137,6 @@ smac3-output*
 runs/
 learning_curves/
 results/
+
+# hydra
+.hydra/
