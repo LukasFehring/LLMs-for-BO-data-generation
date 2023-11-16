@@ -15,6 +15,9 @@ import hydra
 
 @hydra.main(config_path="./hydra_config", config_name="base", version_base="1.1")
 def main(cfg: DictConfig):
+    if 'multirun' in os.getcwd():
+        os.chdir('/scratch/hpc-prf-intexml/fehring/generate-smac-runs/symbolic-explanations-data-generation')
+    
     approach = cfg["data-generation"]  
     run_type = approach["run_type"]
     max_hp_comb = approach["max_hp_comb"]
