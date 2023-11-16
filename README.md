@@ -14,6 +14,16 @@ conda env create -f environment.yml
 conda activate symb_expl
 ```
 
+Alternatively, you can install the required packages with `pip`. First, build an environment with Python 3.9,
+```
+conda create -n symb_expl python=3.9
+```
+then install the required packages with the following commands:
+```
+conda install gxx_linux-64>=13.1.0
+pip install -r requirements.txt
+```
+
 To install HPOBench, please run the following after activating the environment:
 ```
 pip install git+https://github.com/automl/HPOBench.git
