@@ -3,7 +3,7 @@ defaults:
 
 hydra:
   launcher:
-    cpus_per_task: 8
+    cpus_per_task: 2
     gpus_per_task: 0
     gres:
     setup:
@@ -11,4 +11,4 @@ hydra:
       - conda activate symb-expl
       - cd $SLURM_SUBMIT_DIR
     timeout_min: 600
-    mem_per_cpu: 8GB
+    mem_per_cpu: 4GB
