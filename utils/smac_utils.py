@@ -47,7 +47,7 @@ def run_smac_optimization(
         configspace=configspace,
         deterministic=True,
         n_trials=n_eval,
-        output_directory=Path(f"{run_dir}/smac/{acquisition_function_name}/{function_name}"),
+        output_directory=Path(f"{run_dir}/smac/{acquisition_function_name}"),
         seed=seed,
     )
 

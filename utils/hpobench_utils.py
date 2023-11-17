@@ -113,7 +113,6 @@ class LRBenchmarkBBDefaultHP(LRBenchmarkBB):
             learning_rate="adaptive",
             tol=None,
             random_state=rng,
-
         )
         return model
 
