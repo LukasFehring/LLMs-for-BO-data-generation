@@ -10,7 +10,7 @@ from utils.hpobench_utils import get_run_config, get_benchmark_dict, get_task_di
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--job_id')
+    parser.add_argument("--job_id")
     args = parser.parse_args()
 
     # number of HPs to optimize
@@ -18,15 +18,14 @@ if __name__ == "__main__":
     # number of HP combinations to consider per model
     max_hp_comb = 1
 
-    dir_with_test_data = "" #"results/runs_surr_hpobench"
+    dir_with_test_data = ""  # "results/runs_surr_hpobench"
     n_test_samples = 100
     parsimony_coefficient_space = [0.0001]
     # if None, calculate metrics over all sample sizes
     eval_at_n_samples = 140
 
     if args.job_id:
-        run_configs = [
-            get_run_config(job_id=args.job_id, n_optimized_params=n_optimized_params, max_hp_comb=max_hp_comb)]
+        run_configs = [get_run_config(job_id=args.job_id, n_optimized_params=n_optimized_params, max_hp_comb=max_hp_comb)]
     else:
         run_configs = get_run_config(n_optimized_params=n_optimized_params, max_hp_comb=max_hp_comb)
 

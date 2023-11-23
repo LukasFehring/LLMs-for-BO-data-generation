@@ -10,7 +10,7 @@ data-generation:
   run_type : "smac"
   max_hp_comb: 1
   n_samples_spacing: [20]
-  n_samples : 20
+  n_samples : 200
   init_design_max_ratio: 0.25
   init_design_n_configs_per_hyperparamter: 8
   n_optimized_params: 2
