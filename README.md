@@ -27,6 +27,8 @@ To install HPOBench, please run the following after activating the environment:
 pip install git+https://github.com/automl/HPOBench.git
 ```
 
+Additionally, you need to install both `hydra-core` and `hydra-colorlog`.
+
 ### Hydra
 To run jobs with hydra without slurm you need to make sure that `hydra_config/base.yaml` starts with
 ```yaml
