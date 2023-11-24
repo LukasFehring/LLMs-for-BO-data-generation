@@ -14,8 +14,10 @@ data-generation:
   init_design_max_ratio: 0.25
   init_design_n_configs_per_hyperparamter: 8
   n_optimized_params: 2
-  n_seeds: 5
+  seed: 0
+  acquisition_function: "EI"
   job_id: 0
+  n_configs: 20
 
 
 hydra:

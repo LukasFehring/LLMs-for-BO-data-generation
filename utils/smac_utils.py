@@ -14,13 +14,12 @@ def run_smac_optimization(
     facade: Type[AbstractFacade],
     acquisition_function: AbstractAcquisitionFunction,
     target_function: Callable,
-    function_name: str,
     n_eval: int,
     run_dir: str,
     seed: int,
     n_configs_per_hyperparamter: int = 8,
     max_ratio: float = 0.25,
-    callback: Union[Callback, None] = None
+    callback: Union[Callback, None] = None,
 ) -> [np.ndarray, np.ndarray]:
     """Runs SMAC Hyperparameter Optimization on the given function within the hyperparameter space.
 
@@ -29,7 +28,6 @@ def run_smac_optimization(
     configspace : Hyperparameter configuration space.
     facade: SMAC facade to be used.
     target_function : Function to be minimized.
-    function_name: Name of the function to be minimized.
     n_eval : Desired number of function evaluations.
     run_dir : Run directory to save SMAC output to.
     seed : Seed to be used in SMAC scenario.
@@ -52,8 +50,7 @@ def run_smac_optimization(
     )
 
     config_selector = facade.get_config_selector(scenario, retrain_after=1)
-    initial_design = facade.get_initial_design(scenario, n_configs_per_hyperparamter=n_configs_per_hyperparamter,
-                                               max_ratio=max_ratio)
+    initial_design = facade.get_initial_design(scenario, n_configs_per_hyperparamter=n_configs_per_hyperparamter, max_ratio=max_ratio)
 
     smac = facade(
         scenario=scenario,
@@ -62,16 +59,14 @@ def run_smac_optimization(
         logging_level=Path("logging_smac.yml"),
         config_selector=config_selector,
         initial_design=initial_design,
-        callbacks=[callback] if callback else []
+        callbacks=[callback] if callback else [],
     )
 
     # re-add log dir handler to logger as it is destroyed everytime a new SMAC facade is created
     logger = logging.getLogger(__name__)
     handler = logging.FileHandler(filename=f"{run_dir}/log.log", encoding="utf8")
     handler.setLevel("INFO")
-    handler.setFormatter(
-        logging.Formatter("[%(levelname)s][%(asctime)s;%(filename)s:%(lineno)d] %(message)s")
-    )
+    handler.setFormatter(logging.Formatter("[%(levelname)s][%(asctime)s;%(filename)s:%(lineno)d] %(message)s"))
     logger.root.addHandler(handler)
 
     incumbent = smac.optimize()
@@ -80,17 +75,8 @@ def run_smac_optimization(
     conf_hp, conf_res = [], []
     hp_names = configspace.get_hyperparameter_names()
     for hp_name in hp_names:
-        conf_hp.append(
-            [
-                config.get_dictionary()[hp_name]
-                if hp_name in config.get_dictionary()
-                else None
-                for config in smac.runhistory.get_configs()
-            ]
-        )
-    conf_res.append(
-        [smac.runhistory.get_cost(config) for config in smac.runhistory.get_configs()]
-    )
+        conf_hp.append([config.get_dictionary()[hp_name] if hp_name in config.get_dictionary() else None for config in smac.runhistory.get_configs()])
+    conf_res.append([smac.runhistory.get_cost(config) for config in smac.runhistory.get_configs()])
 
     conf_hp, conf_res = np.array(conf_hp), np.array(conf_res)
 

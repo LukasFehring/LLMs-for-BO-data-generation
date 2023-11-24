@@ -113,22 +113,21 @@ def get_task_dict():
     return task_dict
 
 
-def get_run_config(n_optimized_params, max_hp_comb=None, job_id=None, parsimony_coefficient_space=None):
+def get_run_config(n_optimized_params, max_hp_comb, job_id):
     run_configs = []
     for benchmark in get_benchmark_dict().keys():
-        hyperparams = benchmark.get_configuration_space().get_hyperparameter_names()
-        hp_comb = combinations(hyperparams, n_optimized_params)
+        hyperparameter_names = benchmark.get_configuration_space().get_hyperparameter_names()
+        # given x hyperparameters, they are split into a list of tuples where each tuple contains n_optimized_params
+        # Example: hyperparameter_names = ["a", "b", "c", "d"] and n_optimized_params = 2
+        # --> hp_comb = [("a", "b"), ("a", "c"), ("a", "d"), ("b", "c"), ("b", "d"), ("c", "d")]
+        hp_comb = combinations(hyperparameter_names, n_optimized_params)
         if max_hp_comb:
             hpc = list(hp_comb)[:max_hp_comb]
         else:
             hpc = hp_comb
         for hp_conf in hpc:
             for task_id in get_task_dict().keys():
-                if parsimony_coefficient_space:
-                    for parsimony in parsimony_coefficient_space:
-                        run_configs.append({"benchmark": benchmark, "task_id": task_id, "hp_conf": hp_conf, "parsimony": parsimony})
-                else:
-                    run_configs.append({"benchmark": benchmark, "task_id": task_id, "hp_conf": hp_conf})
+                run_configs.append({"benchmark": benchmark, "task_id": task_id, "hp_conf": hp_conf})
     return run_configs[int(job_id)]
 
 
