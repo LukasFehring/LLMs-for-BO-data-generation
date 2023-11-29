@@ -13,16 +13,18 @@ from ConfigSpace import ConfigurationSpace
 from smac import Callback
 from smac.acquisition.function import AbstractAcquisitionFunction
 from copy import deepcopy
+import logging
 
 RANDOM_CONFIGS = 100
 
 
 class CustomCallback(Callback):
-    def __init__(self, n_configs: int, path: str = None) -> None:
+    def __init__(self, n_configs: int, path: str) -> None:
         super().__init__()
         self.counter = 0
         self.n_configs = n_configs
         self.path = path
+        self.logger = logging.getLogger(path=f"{path}/callback_log.log")
 
     def on_acquisition_maximized(self, acquisition_function: AbstractAcquisitionFunction) -> None:
         def extact_data_list():
@@ -31,12 +33,14 @@ class CustomCallback(Callback):
             data = zip(*zip(*map(lambda config: config.values(), configs)), acquisition_function_values)
             return pd.DataFrame(data, columns=columns + ["acquisition_function_value"])
 
+        self.logger.info(f"Writing data {self.counter} to csv")
         config_space: ConfigurationSpace = deepcopy(acquisition_function.model._configspace)
         config_space.seed(self.counter)
         configs = config_space.sample_configuration(self.n_configs)
 
         df = extact_data_list()
         df.to_csv(f"{self.path}/{self.counter}.csv")
+        self.logger.info(f"Finished writing data {self.counter} to csv")
         self.counter += 1
 
 
@@ -63,9 +67,9 @@ def main(cfg: DictConfig):
     acquisition_function = ACQUISITION_FUNCTIONS[approach["acquisition_function"]]
     seed = int(approach["seed"])
     sampling_dir_name = "runs_sampling_hpobench"
-    n_configs = approach["n_configs"]
+    n_configs = approach["n_configs"]  # TODO rename - amount of configs sampled randomly
 
-    run_conf = get_run_config(n_optimized_params, max_hp_comb, job_id)  # TODO: which jobids
+    run_conf = get_run_config(n_optimized_params, max_hp_comb, job_id)  # TODO: 365 jobsids
     task_dict = get_task_dict()
 
     data_set_postfix = f"_{task_dict[run_conf['task_id']]}"

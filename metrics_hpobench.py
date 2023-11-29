@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # if None, calculate metrics over all sample sizes
     eval_at_n_samples = 140
 
-    if args.job_id:
+    if args.job_id:  # 365 jobids
         run_configs = [get_run_config(job_id=args.job_id, n_optimized_params=n_optimized_params, max_hp_comb=max_hp_comb)]
     else:
         run_configs = get_run_config(n_optimized_params=n_optimized_params, max_hp_comb=max_hp_comb)
