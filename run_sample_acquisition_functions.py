@@ -24,7 +24,7 @@ class CustomCallback(Callback):
         self.counter = 0
         self.n_configs = n_configs
         self.path = path
-        self.logger = logging.getLogger(path=f"{path}/callback_log.log")
+        self.logger = logging.getLogger(f"{path}/callback_log.log")
 
     def on_acquisition_maximized(self, acquisition_function: AbstractAcquisitionFunction) -> None:
         def extact_data_list():
