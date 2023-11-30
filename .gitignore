@@ -141,3 +141,4 @@ results/
 # hydra
 .hydra/
 data/acquisition_function_data/*
+multirun/*
