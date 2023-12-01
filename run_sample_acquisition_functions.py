@@ -4,14 +4,13 @@ import pandas as pd
 import shutil
 from smac import BlackBoxFacade
 from omegaconf import DictConfig
-from utils.logging_utils import get_logger
 from utils.smac_utils import run_smac_optimization
 from utils.hpobench_utils import get_run_config, get_benchmark_dict, get_task_dict
 from smac.acquisition.function import LCB, EI, PI
 import hydra
 from ConfigSpace import ConfigurationSpace
 from smac import Callback
-from smac.acquisition.function import AbstractAcquisitionFunction
+from smac.main.config_selector import ConfigSelector
 from copy import deepcopy
 import logging
 
@@ -24,23 +23,28 @@ class CustomCallback(Callback):
         self.counter = 0
         self.n_configs = n_configs
         self.path = path
-        self.logger = logging.getLogger(f"{path}/callback_log.log")
+        self.callback_logger = logging.getLogger("CallbackLogger", )
+        file_handler = logging.FileHandler(os.path.join(path, "callback.log"))
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        file_handler.setFormatter(formatter)
+        self.callback_logger.addHandler(file_handler)
 
-    def on_acquisition_maximized(self, acquisition_function: AbstractAcquisitionFunction) -> None:
+    def on_next_configurations_start(self,  config_selector: ConfigSelector) -> None:
         def extact_data_list():
-            acquisition_function_values = acquisition_function(configs)[:, 0]
+            acquisition_function_values = config_selector._acquisition_function(configs)[:, 0]
             columns = configs[0].keys()
             data = zip(*zip(*map(lambda config: config.values(), configs)), acquisition_function_values)
             return pd.DataFrame(data, columns=columns + ["acquisition_function_value"])
 
-        self.logger.info(f"Writing data {self.counter} to csv")
-        config_space: ConfigurationSpace = deepcopy(acquisition_function.model._configspace)
+        self.callback_logger.info(f"Writing data {self.counter} to csv")
+        config_space: ConfigurationSpace = deepcopy(config_selector._acquisition_function.model._configspace)
         config_space.seed(self.counter)
         configs = config_space.sample_configuration(self.n_configs)
 
         df = extact_data_list()
         df.to_csv(f"{self.path}/{self.counter}.csv")
-        self.logger.info(f"Finished writing data {self.counter} to csv")
+        self.callback_logger.info(f"Finished writing data {self.counter} to csv")
         self.counter += 1
 
 
@@ -90,14 +94,6 @@ def main(cfg: DictConfig):
         shutil.rmtree(sampling_run_dir)
 
     os.makedirs(sampling_run_dir)
-
-    # setup logging
-    logger = get_logger(filename=f"{sampling_run_dir}/sampling_log.log")
-
-    logger.info(f"Start {run_type} sampling for {run_name}.")
-
-    logger.info(f"Run: {run_name}")
-    logger.info(f"Start run to sample {n_samples} samples.")
 
     np.random.seed(seed)
 
