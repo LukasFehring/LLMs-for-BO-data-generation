@@ -47,7 +47,7 @@ class CustomCallback(Callback):
             df = extact_data_list()
             df.to_csv(f"{self.path}/{self.counter}.csv")
             self.callback_logger.info(f"Finished writing data {self.counter} to csv")
-        except ValueError as e:
+        except Exception as e:
             self.callback_logger.error(f"Error writing data {self.counter} to csv: {e}")
         finally:
             self.counter += 1

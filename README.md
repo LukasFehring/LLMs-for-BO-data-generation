@@ -1,6 +1,6 @@
 # LLMs for BO - Data Generation
 
-This repository contains the data generation process for [LLMs for BO](https://github.com/automl-private/LLMs-for-BO). The code is heavily based on the forked repository [Symbolic Explanations for Hyperparameter Optimization](https://github.com/automl/symbolic-explanations/). The main modifications are the additions of acquisition functions and transformation to be run with hydra and schedule slurm jobs with [hydra submitit](https://hydra.cc/docs/plugins/submitit_launcher/).
+This repository contains the data generation process for [LLMs for BO](https://github.com/automl-private/LLMs-for-BO). The code is heavily based on the forked repository [Symbolic Explanations for Hyperparameter Optimization](https://github.com/automl/symbolic-explanations/). The main modifications are the additions of acquisition functions and transformation to be run with hydra and schedule slurm jobs with [hydra submitit](https://hydra.cc/docs/plugins/submitit_launcher/). Additionally before for every sampled configuration (after the initial samles), (20) datapoints from the searchspace and theri values in the acquisition function is sampled. 
 
 ## Installation
 
