@@ -23,29 +23,34 @@ class CustomCallback(Callback):
         self.counter = 0
         self.n_configs = n_configs
         self.path = path
-        self.callback_logger = logging.getLogger("CallbackLogger", )
+        self.callback_logger = logging.getLogger(
+            "CallbackLogger",
+        )
         file_handler = logging.FileHandler(os.path.join(path, "callback.log"))
         file_handler.setLevel(logging.INFO)
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         file_handler.setFormatter(formatter)
         self.callback_logger.addHandler(file_handler)
 
-    def on_next_configurations_start(self,  config_selector: ConfigSelector) -> None:
+    def on_next_configurations_start(self, config_selector: ConfigSelector) -> None:
         def extact_data_list():
             acquisition_function_values = config_selector._acquisition_function(configs)[:, 0]
             columns = configs[0].keys()
             data = zip(*zip(*map(lambda config: config.values(), configs)), acquisition_function_values)
             return pd.DataFrame(data, columns=columns + ["acquisition_function_value"])
 
-        self.callback_logger.info(f"Writing data {self.counter} to csv")
-        config_space: ConfigurationSpace = deepcopy(config_selector._acquisition_function.model._configspace)
-        config_space.seed(self.counter)
-        configs = config_space.sample_configuration(self.n_configs)
-
-        df = extact_data_list()
-        df.to_csv(f"{self.path}/{self.counter}.csv")
-        self.callback_logger.info(f"Finished writing data {self.counter} to csv")
-        self.counter += 1
+        try:
+            self.callback_logger.info(f"Writing data {self.counter} to csv")
+            config_space: ConfigurationSpace = deepcopy(config_selector._acquisition_function.model._configspace)
+            config_space.seed(self.counter)
+            configs = config_space.sample_configuration(self.n_configs)
+            df = extact_data_list()
+            df.to_csv(f"{self.path}/{self.counter}.csv")
+            self.callback_logger.info(f"Finished writing data {self.counter} to csv")
+        except ValueError as e:
+            self.callback_logger.error(f"Error writing data {self.counter} to csv: {e}")
+        finally:
+            self.counter += 1
 
 
 ACQUISITION_FUNCTIONS = {
