@@ -75,7 +75,6 @@ def main(cfg: DictConfig):
     job_id = approach["job_id"]
     acquisition_function = ACQUISITION_FUNCTIONS[approach["acquisition_function"]]
     seed = int(approach["seed"])
-    sampling_dir_name = "runs_sampling_hpobench"
     n_configs = approach["n_configs"]  # TODO rename - amount of configs sampled randomly
 
     run_conf = get_run_config(n_optimized_params, max_hp_comb, job_id)  # TODO: 365 jobsids
@@ -92,13 +91,6 @@ def main(cfg: DictConfig):
         return result_dict["function_value"]
 
     run_name = f"{model_name.replace(' ', '_')}_{'_'.join(optimized_parameters)}{data_set_postfix}"
-
-    sampling_dir = f"results/{sampling_dir_name}/{run_type}"
-    sampling_run_dir = f"{sampling_dir}/{run_name}"
-    if os.path.exists(sampling_run_dir):
-        shutil.rmtree(sampling_run_dir)
-
-    os.makedirs(sampling_run_dir)
 
     np.random.seed(seed)
 
@@ -120,7 +112,7 @@ def main(cfg: DictConfig):
         acquisition_function=acquisition_function,
         target_function=optimization_function_wrapper,
         n_eval=n_samples,
-        run_dir=sampling_run_dir,
+        run_dir=path,
         seed=seed,
         n_configs_per_hyperparamter=init_design_n_configs_per_hyperparamter,
         max_ratio=init_design_max_ratio,
