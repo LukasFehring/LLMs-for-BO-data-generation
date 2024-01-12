@@ -10,5 +10,5 @@ hydra:
       - module load Miniconda3
       - conda activate symb-expl
       - cd $SLURM_SUBMIT_DIR
-    timeout_min: 600
+    timeout_min: 2400
     mem_per_cpu: 4GB
