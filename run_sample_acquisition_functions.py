@@ -66,7 +66,6 @@ def main(cfg: DictConfig):
         os.chdir("/scratch/hpc-prf-intexml/fehring/generate-smac-runs/symbolic-explanations-data-generation")
 
     approach = cfg["data-generation"]
-    run_type = approach["run_type"]
     max_hp_comb = approach["max_hp_comb"]  # amount of hyperparameter combinations we evalute in one dataset, model combiantion
     init_design_max_ratio = approach["init_design_max_ratio"]
     init_design_n_configs_per_hyperparamter = approach["init_design_n_configs_per_hyperparamter"]
@@ -75,9 +74,9 @@ def main(cfg: DictConfig):
     job_id = approach["job_id"]
     acquisition_function = ACQUISITION_FUNCTIONS[approach["acquisition_function"]]
     seed = int(approach["seed"])
-    n_configs = approach["n_configs"]  # TODO rename - amount of configs sampled randomly
+    n_configs = approach["n_configs"]
 
-    run_conf = get_run_config(n_optimized_params, max_hp_comb, job_id)  # TODO: 365 jobsids
+    run_conf = get_run_config(n_optimized_params, max_hp_comb, job_id)
     task_dict = get_task_dict()
 
     data_set_postfix = f"_{task_dict[run_conf['task_id']]}"

@@ -56,5 +56,5 @@ followed by additional parameters
 
 E.g.
 ```bash
-python run_sampling_hpobench.py -m "data-generation.job_id=range(40)"
+python run_sampling_hpobench.py -m "data-generation.job_id=range(365)"
 ```
