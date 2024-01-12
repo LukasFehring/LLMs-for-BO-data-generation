@@ -97,9 +97,16 @@ def main(cfg: DictConfig):
     cs = b.get_configuration_space(seed=seed, hyperparameters=optimized_parameters)
 
     # path to save files to
-    path = f"data/acquisition_function_data/{run_name}/{acquisition_function.__class__.__name__}/{seed}"
+    path = f"data/acquisition_function_data/{run_name}"
     if not os.path.exists(path):
         os.makedirs(path)
+    path = +f"/{acquisition_function.__class__.__name__}"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    path = +f"/{seed}"
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     with open(f"{path}/configspace.json", "w") as fh:
         fh.write(str(cs))
 
