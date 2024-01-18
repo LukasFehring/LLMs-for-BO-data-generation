@@ -100,10 +100,10 @@ def main(cfg: DictConfig):
     path = f"data/acquisition_function_data/{run_name}"
     if not os.path.exists(path):
         os.makedirs(path)
-    path = +f"/{acquisition_function.__class__.__name__}"
+    path += f"/{acquisition_function.__class__.__name__}"
     if not os.path.exists(path):
         os.makedirs(path)
-    path = +f"/{seed}"
+    path += f"/{seed}"
     if not os.path.exists(path):
         os.makedirs(path)
 

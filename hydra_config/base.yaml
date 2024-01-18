@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  # - slurm
+  - slurm
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
 
