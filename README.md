@@ -24,6 +24,7 @@ Additionally, you need to install both `hydra-core` and `hydra-colorlog` manualy
 ```
 pip install hydra-core
 pip install hydra-colorlog
+pip install hydra-submitit-launcher
 ```
 
 ### Hydra
