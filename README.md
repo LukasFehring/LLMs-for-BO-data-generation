@@ -1,20 +1,12 @@
 # LLMs for BO - Data Generation
 
-This repository contains the data generation process for [LLMs for BO](https://github.com/automl-private/LLMs-for-BO). The code is heavily based on the forked repository [Symbolic Explanations for Hyperparameter Optimization](https://github.com/automl/symbolic-explanations/). The main modifications are the additions of acquisition functions and transformation to be run with hydra and schedule slurm jobs with [hydra submitit](https://hydra.cc/docs/plugins/submitit_launcher/). Additionally before for every sampled configuration (after the initial samles), (20) datapoints from the searchspace and theri values in the acquisition function is sampled. 
+This repository contains the data generation process for [LLMs for BO](https://github.com/automl-private/LLMs-for-BO). The code is heavily based on the forked repository [Symbolic Explanations for Hyperparameter Optimization](https://github.com/automl/symbolic-explanations/). The main modifications are the additions of acquisition functions and transformation to be run with Hydra and schedule slurm jobs with [hydra submitit](https://hydra.cc/docs/plugins/submitit_launcher/). Additionally before every configuration in the evaluation process (after the initial samples), (20) datapoints from the search space and their values in the acquisition function are sampled. 
 
 ## Installation
 
-You can create an environment with all required packages using anaconda and the `environment.yml` 
-file as demonstrated in the following:
-
+You can install the required packages with `pip`. First, build an environment with Python 3.9,
 ```
-conda env create -f environment.yml
-conda activate symb_expl
-```
-
-Alternatively, you can install the required packages with `pip`. First, build an environment with Python 3.9,
-```
-conda create -n symb_expl python=3.9
+conda create -n data-generation python=3.9
 ```
 then install the required packages with the following commands:
 ```
@@ -27,7 +19,12 @@ To install HPOBench, please run the following after activating the environment:
 pip install git+https://github.com/automl/HPOBench.git
 ```
 
-Additionally, you need to install both `hydra-core` and `hydra-colorlog`.
+Additionally, you need to install both `hydra-core` and `hydra-colorlog` manualy with
+
+```
+pip install hydra-core
+pip install hydra-colorlog
+```
 
 ### Hydra
 To run jobs with hydra without slurm you need to make sure that `hydra_config/base.yaml` starts with
