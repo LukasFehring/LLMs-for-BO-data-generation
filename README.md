@@ -55,3 +55,6 @@ E.g.
 ```bash
 python run_sample_acquisition_functions.py -m "data-generation.job_id=range(365)"
 ```
+
+The resulting corpus is saved in `data`
+
